@@ -35,11 +35,6 @@ ignoreNewlinesInTextObjects = "off"
   schema = "public"
   table = "tipo_producto"
 
-[environments.target1]
-url = "jdbc:postgresql://d1088ea8-42f6-49a4-9273-aa8276eb473a.blijti4d0v0nkr55oei0.private.databases.appdomain.cloud:31949/flyway_dev"
-schemas = [ "public" ]
-displayName = " Development database"
-
 [environments.target2]
 url = "jdbc:postgresql://d1088ea8-42f6-49a4-9273-aa8276eb473a.blijti4d0v0nkr55oei0.private.databases.appdomain.cloud:31949/flyway_test"
 schemas = [ "public" ]
@@ -49,3 +44,14 @@ displayName = " Testing database"
 url = "jdbc:postgresql://d1088ea8-42f6-49a4-9273-aa8276eb473a.blijti4d0v0nkr55oei0.private.databases.appdomain.cloud:31949/flyway_prod"
 schemas = [ "public" ]
 displayName = " Production database"
+
+[environments.development]
+url = "jdbc:postgresql://d1088ea8-42f6-49a4-9273-aa8276eb473a.blijti4d0v0nkr55oei0.private.databases.appdomain.cloud:31949/flyway_dev"
+schemas = [ "public" ]
+displayName = "Development database"
+
+[environments.shadow]
+url = "jdbc:postgresql://localhost:5432/flyway_shadow"
+schemas = [ "public" ]
+displayName = "Shadow database"
+provisioner = "clean"
