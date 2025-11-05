@@ -1,0 +1,63 @@
+function "public"."grant_admin_option_to_roles(text[])" {
+  text = """
+
+DECLARE
+    role TEXT;
+    pg_version INT;
+BEGIN
+    -- Get major PostgreSQL version
+    SELECT current_setting('server_version_num')::INT / 10000 INTO pg_version;
+
+    -- Check if version is 16 or higher
+    IF pg_version < 16 THEN
+        RAISE NOTICE 'Skipping: This function only applies to PostgreSQL 16 or higher. Current version: %', pg_version;
+        RETURN;
+    END IF;
+
+    -- Loop through roles and grant ADMIN OPTION to admin (excluding certain roles)
+    FOREACH role IN ARRAY role_list LOOP
+        role := trim(role); -- Trim spaces from each role name
+
+        -- Exclude specific roles dynamically
+        IF role IN (
+            'ibm', 
+            'admin', 
+            'repl', 
+            'ibm-rewind', 
+            'ibm-replication', 
+            'ibm-cloud-base-user-ro', 
+            'pg_monitor', 
+            'pg_signal_backend'
+        ) THEN
+            RAISE NOTICE 'Skipping role: % (not allowed)', role;
+        ELSE
+            EXECUTE format('GRANT %I TO admin WITH ADMIN OPTION', role);
+            RAISE NOTICE 'Granted ADMIN OPTION to admin for role: %', role;
+            RAISE NOTICE 'Successfully processed roles.';
+        END IF;
+    END LOOP;
+END;
+"""
+  returnType = void
+  arguments = <
+    {
+      name = role_list
+      type = text[]
+      mode = VARIADIC
+    }
+
+  >
+  language = plpgsql
+  security = DEFINER
+  owner = ibm
+  privileges = <
+    {
+      grantee = admin
+      privilegeTypes = [
+        EXECUTE
+      ]
+    }
+
+  >
+}
+

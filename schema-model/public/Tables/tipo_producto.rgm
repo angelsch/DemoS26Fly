@@ -1,0 +1,51 @@
+table "public"."tipo_producto" {
+  primaryKey = {
+    columns = [
+      "id"
+    ]
+    name = "tipo_producto_pkey"
+    objectType = primaryKey
+  }
+  dataFilename = tipo_producto-data.json
+  owner = admin
+  columns = (
+    column "id" {
+      type = integer
+      null = NOT NULL
+      default = nextval('public.tipo_producto_id_seq'::regclass)
+    }
+    column "nombre" {
+      type = character varying(100)
+      null = NOT NULL
+    }
+    column "descripcion" {
+      type = text
+    }
+  )
+}
+
+index "public"."idx_tipo_producto_nombre" {
+  table = "public"."tipo_producto"
+  type = btree
+  columns = <
+    {
+      definition = nombre
+    }
+
+  >
+  isUnique = False
+}
+
+index "public"."tipo_producto_nombre_key" {
+  table = "public"."tipo_producto"
+  type = btree
+  columns = <
+    {
+      definition = nombre
+    }
+
+  >
+  isUnique = True
+  isConstraint = true
+}
+

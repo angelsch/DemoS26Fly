@@ -1,0 +1,72 @@
+table "public"."productos" {
+  primaryKey = {
+    columns = [
+      "id"
+    ]
+    name = "productos_pkey"
+    objectType = primaryKey
+  }
+  owner = admin
+  columns = (
+    column "id" {
+      type = integer
+      null = NOT NULL
+      default = nextval('public.productos_id_seq'::regclass)
+    }
+    column "nombre" {
+      type = character varying(100)
+      null = NOT NULL
+    }
+    column "precio" {
+      type = numeric(8,2)
+      null = NOT NULL
+    }
+    column "stock" {
+      type = integer
+      default = 0
+    }
+    column "tipo_id" {
+      type = integer
+      null = NOT NULL
+    }
+  )
+}
+
+foreignKey "public"."productos"."productos_tipo_id_fkey" {
+  columns = [
+    "tipo_id"
+  ]
+  referencedTable = "public"."tipo_producto"
+  referencedColumns = [
+    "id"
+  ]
+}
+
+index "public"."idx_productos_nombre_precio" {
+  table = "public"."productos"
+  type = btree
+  columns = <
+    {
+      definition = nombre
+    }
+
+    {
+      definition = precio
+    }
+
+  >
+  isUnique = False
+}
+
+index "public"."idx_productos_tipo" {
+  table = "public"."productos"
+  type = btree
+  columns = <
+    {
+      definition = tipo_id
+    }
+
+  >
+  isUnique = False
+}
+

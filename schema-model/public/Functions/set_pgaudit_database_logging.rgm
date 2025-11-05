@@ -1,0 +1,50 @@
+function "public"."set_pgaudit_database_logging(text, text[])" {
+  text = """
+
+        DECLARE
+                persist_dblink_extension boolean;
+                allowed_events TEXT [];
+                input_valid boolean;
+                pgaudit_ver_check boolean;
+        BEGIN
+            --misc_set is only available in pgAudit >= 1.4
+            allowed_events := '{read,write,function,role,ddl,misc,misc_set,none}';
+             --lower case the input for case insensitive comparison.
+            SELECT array_agg(x.events) INTO events FROM (SELECT btrim(lower(unnest(events)))::TEXT AS events) AS x;
+            SELECT events  <@ allowed_events INTO input_valid;
+            IF not input_valid
+            THEN
+                RAISE EXCEPTION 'Invalid options provided: %, Allowed events: %.', events,allowed_events;
+            END IF;
+            persist_dblink_extension := create_dblink_extension();
+            PERFORM dblink_connect(format('dbname=postgres'));
+            PERFORM dblink_exec(format('ALTER DATABASE %I SET pgaudit.log TO %L;' ,database, array_to_string(events, ',')));
+            PERFORM dblink_disconnect();
+            PERFORM pg_reload_conf();
+            IF persist_dblink_extension = FALSE
+            THEN
+                DROP EXTENSION IF EXISTS dblink;
+            END IF;
+            RETURN 'ok';
+        END
+"""
+  returnType = text
+  arguments = <
+    {
+      name = database
+      type = text
+      mode = IN
+    }
+
+    {
+      name = events
+      type = text[]
+      mode = IN
+    }
+
+  >
+  language = plpgsql
+  security = DEFINER
+  owner = ibm
+}
+

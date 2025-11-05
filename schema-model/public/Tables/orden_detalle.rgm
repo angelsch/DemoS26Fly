@@ -1,0 +1,66 @@
+table "public"."orden_detalle" {
+  primaryKey = {
+    columns = [
+      "id"
+    ]
+    name = "orden_detalle_pkey"
+    objectType = primaryKey
+  }
+  owner = admin
+  columns = (
+    column "id" {
+      type = integer
+      null = NOT NULL
+      default = nextval('public.orden_detalle_id_seq'::regclass)
+    }
+    column "orden_id" {
+      type = integer
+      null = NOT NULL
+    }
+    column "producto_id" {
+      type = integer
+      null = NOT NULL
+    }
+    column "cantidad" {
+      type = integer
+      null = NOT NULL
+    }
+    column "precio_unitario" {
+      type = numeric(8,2)
+      null = NOT NULL
+    }
+  )
+}
+
+foreignKey "public"."orden_detalle"."orden_detalle_orden_id_fkey" {
+  columns = [
+    "orden_id"
+  ]
+  referencedTable = "public"."ordenes"
+  referencedColumns = [
+    "id"
+  ]
+}
+
+foreignKey "public"."orden_detalle"."orden_detalle_producto_id_fkey" {
+  columns = [
+    "producto_id"
+  ]
+  referencedTable = "public"."productos"
+  referencedColumns = [
+    "id"
+  ]
+}
+
+index "public"."idx_detalle_orden" {
+  table = "public"."orden_detalle"
+  type = btree
+  columns = <
+    {
+      definition = orden_id
+    }
+
+  >
+  isUnique = False
+}
+

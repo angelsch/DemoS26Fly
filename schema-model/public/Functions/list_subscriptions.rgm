@@ -1,0 +1,25 @@
+function "public"."list_subscriptions()" {
+  text = """-
+
+                BEGIN
+                    RETURN QUERY SELECT s.subdbid,s.subname, s.subowner , s.subenabled ,s.subconninfo ,s.subslotname  ,s.subsynccommit ,s.subpublications from pg_subscription s;
+                END
+        
+"""
+  returnType = TABLE(subdbid oid, subname name, subowner oid, subenabled boolean, subconninfo text, subslotname name, subsynccommit text, subpublications text[])
+  arguments = [
+  ]
+  language = plpgsql
+  security = DEFINER
+  owner = ibm
+  privileges = <
+    {
+      grantee = admin
+      privilegeTypes = [
+        EXECUTE
+      ]
+    }
+
+  >
+}
+

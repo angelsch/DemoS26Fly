@@ -1,0 +1,48 @@
+function "public"."refresh_subscription(text, text)" {
+  text = """-
+
+                DECLARE
+                     persist_dblink_extension boolean;
+                BEGIN
+                    persist_dblink_extension := create_dblink_extension();
+                    PERFORM dblink_connect(format('dbname=%I', db_name));
+                    PERFORM dblink_exec(format('ALTER SUBSCRIPTION %I REFRESH PUBLICATION', subscription_name));
+                    PERFORM dblink_disconnect();
+
+                    IF persist_dblink_extension = FALSE
+                    THEN
+                        DROP EXTENSION IF EXISTS dblink;
+                    END IF;
+                    RETURN 'ok';
+                END
+        
+"""
+  returnType = text
+  arguments = <
+    {
+      name = subscription_name
+      type = text
+      mode = IN
+    }
+
+    {
+      name = db_name
+      type = text
+      mode = IN
+    }
+
+  >
+  language = plpgsql
+  security = DEFINER
+  owner = ibm
+  privileges = <
+    {
+      grantee = admin
+      privilegeTypes = [
+        EXECUTE
+      ]
+    }
+
+  >
+}
+

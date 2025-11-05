@@ -1,0 +1,25 @@
+function "public"."kill_all_connections()" {
+  text = """
+
+        BEGIN
+                EXECUTE 'SELECT pg_terminate_backend(pg_stat_activity.pid) FROM pg_stat_activity WHERE pg_stat_activity.datname = current_database() AND pid <> pg_backend_pid()';
+                RETURN 'ok';
+        END
+"""
+  returnType = text
+  arguments = [
+  ]
+  language = plpgsql
+  security = DEFINER
+  owner = ibm
+  privileges = <
+    {
+      grantee = admin
+      privilegeTypes = [
+        EXECUTE
+      ]
+    }
+
+  >
+}
+

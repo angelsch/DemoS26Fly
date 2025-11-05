@@ -1,0 +1,25 @@
+function "public"."pg_kill_connection(integer)" {
+  text = select pg_terminate_backend($1);
+  returnType = boolean
+  arguments = <
+    {
+      name = 
+      type = integer
+      mode = IN
+    }
+
+  >
+  language = sql
+  security = DEFINER
+  owner = ibm
+  privileges = <
+    {
+      grantee = admin
+      privilegeTypes = [
+        EXECUTE
+      ]
+    }
+
+  >
+}
+

@@ -1,0 +1,44 @@
+function "public"."enable_dynamic_masking(text)" {
+  text = """
+
+BEGIN
+    -- Validate input
+    IF db_name IS NULL OR btrim(db_name) = '' THEN
+        RAISE EXCEPTION 'Database name is required. Please provide a valid database name.';
+    END IF;
+
+    -- Check if the database exists
+    IF NOT EXISTS (
+        SELECT 1 FROM pg_database WHERE datname = db_name
+    ) THEN
+        RAISE EXCEPTION 'Database "%" does not exist.', db_name;
+    END IF;
+
+    -- Enable dynamic masking
+    EXECUTE format('ALTER DATABASE %I SET anon.transparent_dynamic_masking TO true;', db_name);
+    RETURN format('Dynamic masking enabled on database "%s".', db_name);
+END;
+"""
+  returnType = text
+  arguments = <
+    {
+      name = db_name
+      type = text
+      mode = IN
+    }
+
+  >
+  language = plpgsql
+  security = DEFINER
+  owner = ibm
+  privileges = <
+    {
+      grantee = admin
+      privilegeTypes = [
+        EXECUTE
+      ]
+    }
+
+  >
+}
+

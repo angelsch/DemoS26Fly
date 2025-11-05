@@ -1,0 +1,25 @@
+function "public"."run_anon_init()" {
+  text = """
+
+BEGIN
+  PERFORM anon.init();
+  RETURN 'Anon init completed.';
+END;
+"""
+  returnType = text
+  arguments = [
+  ]
+  language = plpgsql
+  security = DEFINER
+  owner = ibm
+  privileges = <
+    {
+      grantee = admin
+      privilegeTypes = [
+        EXECUTE
+      ]
+    }
+
+  >
+}
+

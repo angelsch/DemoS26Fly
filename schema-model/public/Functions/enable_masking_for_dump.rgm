@@ -1,0 +1,64 @@
+function "public"."enable_masking_for_dump(text, text)" {
+  text = """
+
+BEGIN
+  -- Input validation
+  IF role_name IS NULL OR length(trim(role_name)) = 0 THEN
+    RAISE EXCEPTION 'Role name must be provided';
+  END IF;
+
+  IF schema_name IS NULL OR length(trim(schema_name)) = 0 THEN
+    RAISE EXCEPTION 'Schema name must be provided';
+  END IF;
+
+  -- Set the schema as TRUSTED for masking
+  EXECUTE format(
+    'SECURITY LABEL FOR anon ON SCHEMA %I IS ''TRUSTED'';',
+    schema_name
+  );
+
+  -- Set dynamic masking for the specified role
+  EXECUTE format(
+    'ALTER ROLE %I SET anon.transparent_dynamic_masking TO TRUE;',
+    role_name
+  );
+
+   RETURN format(
+    'Dynamic masking for dump enabled for role "%s" and schema "%s".',
+    role_name,
+    schema_name
+  );
+EXCEPTION
+  WHEN OTHERS THEN
+    RAISE EXCEPTION 'Error enabling dump masking: %', SQLERRM;    
+END;
+"""
+  returnType = text
+  arguments = <
+    {
+      name = role_name
+      type = text
+      mode = IN
+    }
+
+    {
+      name = schema_name
+      type = text
+      mode = IN
+    }
+
+  >
+  language = plpgsql
+  security = DEFINER
+  owner = ibm
+  privileges = <
+    {
+      grantee = admin
+      privilegeTypes = [
+        EXECUTE
+      ]
+    }
+
+  >
+}
+

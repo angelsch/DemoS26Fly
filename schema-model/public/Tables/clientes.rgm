@@ -1,0 +1,61 @@
+table "public"."clientes" {
+  primaryKey = {
+    columns = [
+      "id"
+    ]
+    name = "clientes_pkey"
+    objectType = primaryKey
+  }
+  owner = admin
+  columns = (
+    column "id" {
+      type = integer
+      null = NOT NULL
+      default = nextval('public.clientes_id_seq'::regclass)
+    }
+    column "nombre" {
+      type = character varying(100)
+      null = NOT NULL
+    }
+    column "email" {
+      type = character varying(150)
+      null = NOT NULL
+    }
+    column "telefono" {
+      type = character varying(20)
+    }
+    column "fecha_registro" {
+      type = date
+      default = CURRENT_DATE
+    }
+    column "estado" {
+      type = character varying(20)
+    }
+  )
+}
+
+index "public"."clientes_email_key" {
+  table = "public"."clientes"
+  type = btree
+  columns = <
+    {
+      definition = email
+    }
+
+  >
+  isUnique = True
+  isConstraint = true
+}
+
+index "public"."idx_clientes_estado" {
+  table = "public"."clientes"
+  type = btree
+  columns = <
+    {
+      definition = estado
+    }
+
+  >
+  isUnique = False
+}
+

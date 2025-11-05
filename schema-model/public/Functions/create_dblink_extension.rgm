@@ -1,0 +1,31 @@
+function "public"."create_dblink_extension()" {
+  text = """
+
+        DECLARE
+                persist_dblink_extension boolean;
+        BEGIN
+            SELECT EXISTS(SELECT 1 FROM pg_extension WHERE extname='dblink')::boolean::boolean INTO persist_dblink_extension;
+            IF persist_dblink_extension = FALSE
+            THEN
+                CREATE EXTENSION IF NOT EXISTS dblink;
+            END IF;
+            RETURN persist_dblink_extension;
+        END
+"""
+  returnType = boolean
+  arguments = [
+  ]
+  language = plpgsql
+  security = DEFINER
+  owner = ibm
+  privileges = <
+    {
+      grantee = admin
+      privilegeTypes = [
+        EXECUTE
+      ]
+    }
+
+  >
+}
+

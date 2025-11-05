@@ -1,0 +1,27 @@
+function "public"."grant_pgcron_privileges()" {
+  text = """
+
+BEGIN
+
+    EXECUTE  'GRANT EXECUTE ON FUNCTION cron.schedule_in_database TO admin';
+    EXECUTE  'GRANT USAGE ON SCHEMA cron TO admin';
+    RETURN  'Granted permission on pg_cron ';
+END;
+"""
+  returnType = text
+  arguments = [
+  ]
+  language = plpgsql
+  security = DEFINER
+  owner = ibm
+  privileges = <
+    {
+      grantee = admin
+      privilegeTypes = [
+        EXECUTE
+      ]
+    }
+
+  >
+}
+

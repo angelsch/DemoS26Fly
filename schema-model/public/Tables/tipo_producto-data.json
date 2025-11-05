@@ -1,0 +1,8 @@
+{
+  "columns": ["id","nombre","descripcion"]
+  ,"rows": [
+    ["1","'Electrónica'","'Dispositivos electrónicos como laptops, monitores, etc.'"]
+    ,["2","'Accesorios'","'Complementos como mouse, teclados, cables.'"]
+    ,["3","'Muebles'","'Mesas, sillas y soportes para oficina.'"]
+  ]
+}

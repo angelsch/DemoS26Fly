@@ -1,0 +1,118 @@
+function "public"."create_subscription(text, text, text, text, text, text, text, boolean, text, boolean)" {
+  text = """-
+
+                DECLARE
+                     persist_dblink_extension boolean;
+                     pg_ver int;
+                BEGIN
+                    IF origin is distinct from 'NONE' AND origin is distinct from 'ANY'
+                    THEN
+                        RETURN 'invalid argument value for origin';
+                    END IF;
+                    persist_dblink_extension := create_dblink_extension();
+                    PERFORM dblink_connect(format('dbname=%I', db_name));
+                    -- Support origin and copy_data only in pg17 (earlier version don't support origin)
+                    SELECT current_setting('server_version_num') INTO pg_ver;
+                    IF pg_ver < 170000
+                    THEN
+                        -- PG < 17 (copy_data was supported earlier, but we care about origin)
+                        PERFORM dblink_exec(format('CREATE SUBSCRIPTION %I CONNECTION %L PUBLICATION %I',
+                            subscription_name,
+                            format('host=%L port=%L password=%L user=%L dbname=%I sslmode=require', host_ip, portNum, password, username, db_name),
+                            publisher_name));
+                    ELSE
+                        -- PG 17 and newer
+                        PERFORM dblink_exec(format('CREATE SUBSCRIPTION %I CONNECTION %L PUBLICATION %I WITH ( copy_data = %s , failover = %s , origin = %s)',
+                            subscription_name,
+                            format('host=%L port=%L password=%L user=%L dbname=%I sslmode=require', host_ip, portNum, password, username, db_name),
+                            publisher_name, copy_data::text, failover::text, origin));
+                    END IF;
+                    PERFORM dblink_disconnect();
+                    IF persist_dblink_extension = FALSE
+                    THEN
+                        DROP EXTENSION IF EXISTS dblink;
+                    END IF;
+                    RETURN 'ok';
+                END
+        
+"""
+  returnType = text
+  arguments = <
+    {
+      name = subscription_name
+      type = text
+      mode = IN
+    }
+
+    {
+      name = host_ip
+      type = text
+      mode = IN
+    }
+
+    {
+      name = portnum
+      type = text
+      mode = IN
+    }
+
+    {
+      name = password
+      type = text
+      mode = IN
+    }
+
+    {
+      name = username
+      type = text
+      mode = IN
+    }
+
+    {
+      name = db_name
+      type = text
+      mode = IN
+    }
+
+    {
+      name = publisher_name
+      type = text
+      mode = IN
+    }
+
+    {
+      name = copy_data
+      type = boolean
+      mode = IN
+      default = true
+    }
+
+    {
+      name = origin
+      type = text
+      mode = IN
+      default = 'ANY'::text
+    }
+
+    {
+      name = failover
+      type = boolean
+      mode = IN
+      default = true
+    }
+
+  >
+  language = plpgsql
+  security = DEFINER
+  owner = ibm
+  privileges = <
+    {
+      grantee = admin
+      privilegeTypes = [
+        EXECUTE
+      ]
+    }
+
+  >
+}
+

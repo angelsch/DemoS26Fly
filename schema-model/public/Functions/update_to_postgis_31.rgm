@@ -1,0 +1,42 @@
+function "public"."update_to_postgis_31()" {
+  text = """
+
+        DECLARE
+            postgis_31_ver text;
+        BEGIN
+                IF NOT EXISTS (SELECT 1 FROM pg_extension WHERE extname='postgis') THEN
+                    RAISE EXCEPTION 'PostGIS is not installed.';
+                END IF;
+                SELECT
+                    version
+                INTO
+                    postgis_31_ver
+                FROM
+                    pg_available_extension_versions
+                WHERE
+                    name='postgis' AND
+                    version like '3.1%' AND
+                    version NOT LIKE '%next';
+                EXECUTE 'ALTER EXTENSION postgis UPDATE to '|| quote_literal(postgis_31_ver);
+                EXECUTE 'SELECT postgis_extensions_upgrade();';
+                EXECUTE 'DROP EXTENSION postgis_raster;';
+              --  RETURN 'ok';
+        END
+"""
+  returnType = void
+  arguments = [
+  ]
+  language = plpgsql
+  security = DEFINER
+  owner = ibm
+  privileges = <
+    {
+      grantee = admin
+      privilegeTypes = [
+        EXECUTE
+      ]
+    }
+
+  >
+}
+

@@ -1,0 +1,39 @@
+function "public"."k_anonymity()" {
+  text = """
+
+DECLARE
+    role_name TEXT := 'admin';
+BEGIN
+    -- Check if the role 'admin' exists
+    IF NOT EXISTS (
+        SELECT 1 FROM pg_roles WHERE rolname = role_name
+    ) THEN
+        RAISE EXCEPTION 'Role "%" does not exist.', role_name;
+    END IF;
+
+    -- Grant SELECT privilege on anon.pg_identifiers
+    EXECUTE format(
+        'GRANT SELECT ON anon.pg_identifiers TO %I;',
+        role_name
+    );
+
+    RETURN format('Granted SELECT on anon.pg_identifiers to role "%s".', role_name);
+END;
+"""
+  returnType = text
+  arguments = [
+  ]
+  language = plpgsql
+  security = DEFINER
+  owner = ibm
+  privileges = <
+    {
+      grantee = admin
+      privilegeTypes = [
+        EXECUTE
+      ]
+    }
+
+  >
+}
+

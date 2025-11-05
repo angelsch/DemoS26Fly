@@ -1,0 +1,59 @@
+table "public"."ordenes" {
+  primaryKey = {
+    columns = [
+      "id"
+    ]
+    name = "ordenes_pkey"
+    objectType = primaryKey
+  }
+  owner = admin
+  columns = (
+    column "id" {
+      type = integer
+      null = NOT NULL
+      default = nextval('public.ordenes_id_seq'::regclass)
+    }
+    column "cliente_id" {
+      type = integer
+      null = NOT NULL
+    }
+    column "fecha_orden" {
+      type = date
+      null = NOT NULL
+    }
+    column "total" {
+      type = numeric(10,2)
+      null = NOT NULL
+    }
+    column "estado" {
+      type = character varying(20)
+    }
+  )
+}
+
+foreignKey "public"."ordenes"."ordenes_cliente_id_fkey" {
+  columns = [
+    "cliente_id"
+  ]
+  referencedTable = "public"."clientes"
+  referencedColumns = [
+    "id"
+  ]
+}
+
+index "public"."idx_ordenes_cliente_estado" {
+  table = "public"."ordenes"
+  type = btree
+  columns = <
+    {
+      definition = cliente_id
+    }
+
+    {
+      definition = estado
+    }
+
+  >
+  isUnique = False
+}
+
